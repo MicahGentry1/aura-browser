@@ -3,14 +3,14 @@
 A modern, fast, and feature-rich desktop web browser powered by the **Chromium** rendering engine (Blink & V8) built with Electron and HTML5/CSS3/JS.
 
 ![Chromium Engine](https://img.shields.io/badge/Engine-Chromium%20Blink-6366f1?style=for-the-badge)
-![Extensions](https://img.shields.io/badge/Extensions-Chrome%20Unpacked-818cf8?style=for-the-badge)
-![Release](https://img.shields.io/badge/Release-v1.0.2-6366f1?style=for-the-badge)
+![Extensions](https://img.shields.io/badge/Extensions-Chrome%20Web%20Store-818cf8?style=for-the-badge)
+![Release](https://img.shields.io/badge/Release-v1.0.3-6366f1?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-MIT-10b981?style=for-the-badge)
 ![Platform](https://img.shields.io/badge/Platform-Windows%20x64-0284c7?style=for-the-badge)
 
 ---
 
-### 📦 [Download AuraBrowserSetup.exe (v1.0.2)](https://github.com/MicahGentry1/aura-browser/releases/download/v1.0.2/AuraBrowserSetup.exe)
+### 📦 [Download AuraBrowserSetup.exe (v1.0.3)](https://github.com/MicahGentry1/aura-browser/releases/download/v1.0.3/AuraBrowserSetup.exe)
 
 > [!NOTE]
 > **Windows SmartScreen / Defender Notice**:
@@ -24,7 +24,7 @@ A modern, fast, and feature-rich desktop web browser powered by the **Chromium**
 ## ✨ Features
 
 - ⚡ **Chromium Engine Core**: Powered by Electron's native Blink rendering engine and V8 JavaScript engine with isolated sandboxing.
-- 🧩 **Chrome Extension Support**: Built-in Extensions Manager allowing you to load and manage unpacked Chrome Extensions (Manifest V2 & V3) with automatic persistence. Includes a sample extension!
+- 🛒 **Direct Chrome Web Store Extension Installation**: Download and install extensions directly from the Chrome Web Store with automatic CRX extraction and persistent loading. Includes one-click banner detection when visiting Web Store pages!
 - 🔒 **Tab Pinning**: Right-click any tab to pin it. Pinned tabs shrink to a compact favicon-only view and stay locked to the left side of the tab bar.
 - 📸 **Page Screenshot (`Ctrl+Shift+S`)**: Instantly capture and download the current page as a PNG image with visual flash feedback.
 - 🖼️ **Picture-in-Picture Mode**: Pop out any video on the current page into a floating PiP window that stays on top.

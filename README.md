@@ -3,6 +3,7 @@
 A modern, fast, and feature-rich desktop web browser powered by the **Chromium** rendering engine (Blink & V8) built with Electron and HTML5/CSS3/JS.
 
 ![Chromium Engine](https://img.shields.io/badge/Engine-Chromium%20Blink-6366f1?style=for-the-badge)
+![Extensions](https://img.shields.io/badge/Extensions-Chrome%20Unpacked-818cf8?style=for-the-badge)
 ![Release](https://img.shields.io/badge/Release-v1.0.0-6366f1?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-MIT-10b981?style=for-the-badge)
 ![Platform](https://img.shields.io/badge/Platform-Windows%20x64-0284c7?style=for-the-badge)
@@ -23,6 +24,7 @@ A modern, fast, and feature-rich desktop web browser powered by the **Chromium**
 ## ✨ Features
 
 - ⚡ **Chromium Engine Core**: Powered by Electron's native Blink rendering engine and V8 JavaScript engine with isolated sandboxing.
+- 🧩 **Chrome Extension Support**: Built-in Extensions Manager (`🧩`) allowing you to load and manage unpacked Chrome Extensions (Manifest V2 & V3) with automatic persistence. Includes a sample extension!
 - 🎨 **Glassmorphic Dark Theme**: Modern dark aesthetic with smooth micro-animations, glow accents, and responsive layout.
 - 🗂️ **Multi-Tab System**: Dynamic tab creation (`+`), switching, titles, favicons, text clipping, and tab closing (`×`).
 - 🛡️ **Privacy & Ad Shield**: Intercepts known ad/tracker network requests with a live blocked count counter badge and toggle button.

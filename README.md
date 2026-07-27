@@ -11,6 +11,13 @@ A modern, fast, and feature-rich desktop web browser powered by the **Chromium**
 
 ### 📦 [Download AuraBrowserSetup.exe (v1.0.0)](https://github.com/MicahGentry1/aura-browser/releases/download/v1.0.0/AuraBrowserSetup.exe)
 
+> [!NOTE]
+> **Windows SmartScreen / Defender Notice**:
+> If Windows SmartScreen displays a *"Windows protected your PC"* or *"Unknown Publisher"* alert when running the installer or executable, **it is 100% safe and NOT a virus**.
+> This warning appears on new open-source software that does not use a paid commercial Code Signing Certificate.
+> 
+> **How to bypass**: Click **"More info"** $\rightarrow$ **"Run anyway"**.
+
 ---
 
 ## ✨ Features

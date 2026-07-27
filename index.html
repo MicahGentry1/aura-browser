@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aura Chromium Browser</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="dark-theme">
+  <div class="browser-app">
+    <!-- Top Browser Chrome Window Header -->
+    <header class="browser-header">
+      <!-- Tab Bar -->
+      <div class="tab-bar-container">
+        <div class="tab-bar" id="tabBar">
+          <!-- Dynamic Tabs Injected Here -->
+        </div>
+        <button class="new-tab-btn" id="newTabBtn" title="New Tab (Ctrl+T)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Address / Navigation Control Bar -->
+      <div class="nav-bar">
+        <!-- Navigation Buttons -->
+        <div class="nav-buttons">
+          <button class="nav-btn" id="backBtn" title="Back (Alt+Left)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+          </button>
+          <button class="nav-btn" id="forwardBtn" title="Forward (Alt+Right)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </button>
+          <button class="nav-btn" id="reloadBtn" title="Reload (Ctrl+R)">
+            <svg class="reload-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M23 4v6h-6"></path>
+              <path d="M1 20v-6h6"></path>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+            </svg>
+          </button>
+          <button class="nav-btn" id="homeBtn" title="Home">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Address Bar Container -->
+        <div class="address-bar-wrapper">
+          <div class="security-badge" id="securityBadge" title="Security Information">
+            <svg class="lock-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+          </div>
+          <button class="shield-btn active" id="shieldBtn" title="Privacy & Ad Shield (Active)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+            <span class="shield-count-badge" id="shieldCount">0</span>
+          </button>
+          <form id="urlForm" class="url-form">
+            <input type="text" id="urlInput" class="url-input" placeholder="Search with Google or enter URL" autocomplete="off" spellcheck="false" />
+          </form>
+          <!-- Zoom Level Controls -->
+          <div class="zoom-controls" id="zoomControls">
+            <button class="zoom-btn" id="zoomOutBtn" title="Zoom Out (Ctrl+-)">-</button>
+            <span class="zoom-val" id="zoomVal" title="Reset Zoom (Ctrl+0)">100%</span>
+            <button class="zoom-btn" id="zoomInBtn" title="Zoom In (Ctrl++)">+</button>
+          </div>
+          <button class="bookmark-toggle-btn" id="bookmarkToggleBtn" title="Bookmark this page">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Action Tools & Menu -->
+        <div class="action-buttons">
+          <button class="nav-btn" id="findInPageBtn" title="Find in Page (Ctrl+F)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </button>
+          <button class="nav-btn" id="toggleBookmarksBarBtn" title="Toggle Bookmarks Bar (Ctrl+Shift+B)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+            </svg>
+          </button>
+          <button class="nav-btn" id="historyDrawerBtn" title="Browsing History (Ctrl+H)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </button>
+          <button class="nav-btn" id="downloadsDrawerBtn" title="Downloads">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            <span class="badge-dot" id="downloadBadge" style="display: none;"></span>
+          </button>
+          <button class="nav-btn" id="devToolsBtn" title="Toggle Chromium DevTools (F12)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="16 18 22 12 16 6"></polyline>
+              <polyline points="8 6 2 12 8 18"></polyline>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Bookmarks Bar -->
+      <div class="bookmarks-bar" id="bookmarksBar">
+        <!-- Bookmark items rendered dynamically -->
+      </div>
+
+      <!-- Page Loading Progress Bar -->
+      <div class="progress-bar" id="progressBar"></div>
+    </header>
+
+    <!-- Main Viewport Container for Chromium Webviews -->
+    <main class="webview-container" id="webviewContainer">
+      <!-- Webviews attached dynamically -->
+
+      <!-- Floating Find in Page Overlay Bar -->
+      <div class="find-bar" id="findBar" style="display: none;">
+        <input type="text" id="findInput" class="find-input" placeholder="Find in page..." autocomplete="off" />
+        <span class="find-count" id="findCount">0 / 0</span>
+        <button class="find-btn" id="findPrevBtn" title="Previous match (Shift+Enter)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"></polyline></svg>
+        </button>
+        <button class="find-btn" id="findNextBtn" title="Next match (Enter)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+        <button class="find-btn close-find-btn" id="closeFindBtn">&times;</button>
+      </div>
+    </main>
+
+    <!-- History Drawer Overlay -->
+    <aside class="drawer" id="historyDrawer">
+      <div class="drawer-header">
+        <h3>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          Browsing History
+        </h3>
+        <div class="drawer-actions">
+          <button class="text-btn danger" id="clearHistoryBtn">Clear History</button>
+          <button class="close-drawer-btn" id="closeHistoryBtn">&times;</button>
+        </div>
+      </div>
+      <div class="drawer-search">
+        <input type="text" id="historySearchInput" placeholder="Search history..." />
+      </div>
+      <div class="drawer-content" id="historyList">
+        <!-- History items -->
+      </div>
+    </aside>
+
+    <!-- Downloads Drawer Overlay -->
+    <aside class="drawer" id="downloadsDrawer">
+      <div class="drawer-header">
+        <h3>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Downloads
+        </h3>
+        <button class="close-drawer-btn" id="closeDownloadsBtn">&times;</button>
+      </div>
+      <div class="drawer-content" id="downloadsList">
+        <div class="empty-state">No active or past downloads</div>
+      </div>
+    </aside>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

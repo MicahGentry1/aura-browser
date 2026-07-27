@@ -167,6 +167,13 @@
         <button class="close-drawer-btn" id="closeUpdateBannerBtn">&times;</button>
       </div>
 
+      <!-- Chrome Web Store Banner -->
+      <div class="update-banner webstore-banner" id="webstoreBanner" style="display: none;">
+        <span class="update-msg" id="webstoreMsg">🧩 Chrome Web Store Extension Detected</span>
+        <button class="text-btn primary" id="installCurrentWebstoreExtBtn">⚡ Add to Aura Browser</button>
+        <button class="close-drawer-btn" id="closeWebstoreBannerBtn">&times;</button>
+      </div>
+
       <!-- Page Loading Progress Bar -->
       <div class="progress-bar" id="progressBar"></div>
     </header>
@@ -201,6 +208,12 @@
         <div class="drawer-actions">
           <button class="text-btn primary" id="loadUnpackedBtn">+ Load Unpacked</button>
           <button class="close-drawer-btn" id="closeExtensionsBtn">&times;</button>
+        </div>
+      </div>
+      <div class="drawer-search">
+        <div class="webstore-box">
+          <input type="text" id="webstoreInput" placeholder="Paste Web Store URL or ID (e.g. cjpalhdlnbpafiamejdnhcphjbkeiagm)" />
+          <button class="text-btn primary" id="installWebstoreBtn">Install Extension</button>
         </div>
       </div>
       <div class="drawer-content" id="extensionsList">

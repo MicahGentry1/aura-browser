@@ -39,7 +39,8 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Aura Browser"
+      "shortcutName": "Aura Browser",
+      "artifactName": "AuraBrowserSetup.exe"
     }
   },
   "keywords": [
@@ -57,6 +58,7 @@
     "electron-winstaller": "^5.4.4"
   },
   "dependencies": {
+    "adm-zip": "^0.6.0",
     "electron-squirrel-startup": "^1.0.1",
     "electron-updater": "^6.8.9"
   }

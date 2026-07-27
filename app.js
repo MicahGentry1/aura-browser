@@ -86,12 +86,38 @@ class AuraBrowser {
     this.extensionsDrawer = document.getElementById('extensionsDrawer');
     this.closeExtensionsBtn = document.getElementById('closeExtensionsBtn');
     this.loadUnpackedBtn = document.getElementById('loadUnpackedBtn');
+    this.webstoreInput = document.getElementById('webstoreInput');
+    this.installWebstoreBtn = document.getElementById('installWebstoreBtn');
     this.extensionsList = document.getElementById('extensionsList');
+
+    // WebStore Banner Elements
+    this.webstoreBanner = document.getElementById('webstoreBanner');
+    this.webstoreMsg = document.getElementById('webstoreMsg');
+    this.installCurrentWebstoreExtBtn = document.getElementById('installCurrentWebstoreExtBtn');
+    this.closeWebstoreBannerBtn = document.getElementById('closeWebstoreBannerBtn');
   }
 
   initEventListeners() {
     // New tab button
     this.newTabBtn.addEventListener('click', () => this.createTab());
+
+    // Chrome WebStore controls
+    this.installWebstoreBtn.addEventListener('click', () => {
+      if (this.webstoreInput.value.trim()) {
+        this.installFromWebstore(this.webstoreInput.value.trim());
+      }
+    });
+
+    this.installCurrentWebstoreExtBtn.addEventListener('click', () => {
+      const activeTab = this.getActiveTab();
+      if (activeTab && activeTab.url) {
+        this.installFromWebstore(activeTab.url);
+      }
+    });
+
+    this.closeWebstoreBannerBtn.addEventListener('click', () => {
+      this.webstoreBanner.style.display = 'none';
+    });
 
     // Updater controls
     this.checkUpdatesBtn.addEventListener('click', () => {
@@ -586,6 +612,13 @@ class AuraBrowser {
       this.updateSecurityBadge(url);
       this.updateBookmarkButtonState(url);
       this.updateNavButtons();
+
+      // Check if page is a Chrome Web Store extension page
+      if (url && (url.includes('chromewebstore.google.com/detail/') || url.includes('chrome.google.com/webstore/detail/'))) {
+        this.webstoreBanner.style.display = 'flex';
+      } else {
+        this.webstoreBanner.style.display = 'none';
+      }
     }
 
     // Save history entry (skip internal newtab pages)
@@ -1113,6 +1146,33 @@ class AuraBrowser {
       setTimeout(() => { activeTab.webview.style.opacity = '1'; }, 150);
     } catch (err) {
       console.warn('Screenshot failed:', err.message);
+    }
+  }
+
+  // --- CHROME WEBSTORE INSTALLATION ---
+  async installFromWebstore(input) {
+    if (!input) return;
+    
+    this.installWebstoreBtn.disabled = true;
+    this.installWebstoreBtn.textContent = 'Downloading...';
+    this.installCurrentWebstoreExtBtn.disabled = true;
+    this.installCurrentWebstoreExtBtn.textContent = '⚡ Downloading Extension...';
+
+    const res = await ipcRenderer.invoke('install-extension-from-webstore', input);
+    
+    this.installWebstoreBtn.disabled = false;
+    this.installWebstoreBtn.textContent = 'Install Extension';
+    this.installCurrentWebstoreExtBtn.disabled = false;
+    this.installCurrentWebstoreExtBtn.textContent = '⚡ Add to Aura Browser';
+
+    if (res && res.success) {
+      this.addExtensionEntry(res);
+      this.renderExtensionsList();
+      this.webstoreBanner.style.display = 'none';
+      if (this.webstoreInput) this.webstoreInput.value = '';
+      alert(`✨ Successfully installed extension:\n${res.name} (v${res.version})!`);
+    } else if (res && res.error) {
+      alert('Extension installation error:\n' + res.error);
     }
   }
 

@@ -219,6 +219,82 @@ ipcMain.handle('remove-extension', async (event, extId) => {
   }
 });
 
+// Chrome Web Store CRX Downloader & Unpacker
+const https = require('https');
+const AdmZip = require('adm-zip');
+
+function downloadBuffer(url) {
+  return new Promise((resolve, reject) => {
+    https.get(url, (res) => {
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        return downloadBuffer(res.headers.location).then(resolve).catch(reject);
+      }
+      if (res.statusCode !== 200) {
+        return reject(new Error(`HTTP ${res.statusCode}`));
+      }
+      const data = [];
+      res.on('data', (chunk) => data.push(chunk));
+      res.on('end', () => resolve(Buffer.concat(data)));
+      res.on('error', reject);
+    }).on('error', reject);
+  });
+}
+
+function extractZipBufferFromCRX(crxBuffer) {
+  if (crxBuffer.slice(0, 4).toString() === 'Cr24') {
+    const version = crxBuffer.readUInt32LE(4);
+    if (version === 3) {
+      const headerSize = crxBuffer.readUInt32LE(8);
+      return crxBuffer.slice(12 + headerSize);
+    } else if (version === 2) {
+      const keyLen = crxBuffer.readUInt32LE(8);
+      const sigLen = crxBuffer.readUInt32LE(12);
+      return crxBuffer.slice(16 + keyLen + sigLen);
+    }
+  }
+  const pkOffset = crxBuffer.indexOf(Buffer.from([0x50, 0x4b, 0x03, 0x04]));
+  if (pkOffset !== -1) {
+    return crxBuffer.slice(pkOffset);
+  }
+  return crxBuffer;
+}
+
+ipcMain.handle('install-extension-from-webstore', async (event, input) => {
+  try {
+    const match = input.match(/([a-z]{32})/i);
+    if (!match) {
+      return { success: false, error: 'Invalid Chrome Web Store URL or Extension ID (must contain 32-character ID).' };
+    }
+    const extId = match[1].toLowerCase();
+
+    const crxUrl = `https://clients2.google.com/service/update2/crx?response=redirect&prodversion=130.0.0.0&acceptformat=crx2,crx3&x=id%3D${extId}%26uc`;
+
+    const crxBuffer = await downloadBuffer(crxUrl);
+    const zipBuffer = extractZipBufferFromCRX(crxBuffer);
+
+    const extensionsDir = path.join(app.getPath('userData'), 'installed_extensions', extId);
+    if (!fs.existsSync(extensionsDir)) {
+      fs.mkdirSync(extensionsDir, { recursive: true });
+    }
+
+    const zip = new AdmZip(zipBuffer);
+    zip.extractAllTo(extensionsDir, true);
+
+    const ext = await session.defaultSession.loadExtension(extensionsDir, { allowFileAccess: true });
+
+    return {
+      success: true,
+      id: ext.id,
+      name: ext.name,
+      version: ext.version,
+      path: extensionsDir
+    };
+  } catch (err) {
+    console.error('Webstore extension install error:', err);
+    return { success: false, error: err.message };
+  }
+});
+
 // IPC Handler to open external link / file location
 ipcMain.on('open-external', (event, targetUrl) => {
   shell.openExternal(targetUrl);

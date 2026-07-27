@@ -627,9 +627,11 @@ class AuraBrowser {
     closeBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       this.closeTab(tab.id);
-    });
-
-    this.tabBar.appendChild(tabEl);
+    if (this.newTabBtn && this.newTabBtn.parentNode === this.tabBar) {
+      this.tabBar.insertBefore(tabEl, this.newTabBtn);
+    } else {
+      this.tabBar.appendChild(tabEl);
+    }
   }
 
   getFaviconSrc(tab) {

@@ -59,7 +59,15 @@ class AuraBrowser {
     this.historyDrawerBtn = document.getElementById('historyDrawerBtn');
     this.downloadsDrawerBtn = document.getElementById('downloadsDrawerBtn');
     this.extensionsDrawerBtn = document.getElementById('extensionsDrawerBtn');
+    this.checkUpdatesBtn = document.getElementById('checkUpdatesBtn');
     this.devToolsBtn = document.getElementById('devToolsBtn');
+
+    // Updater Banner Elements
+    this.updateBanner = document.getElementById('updateBanner');
+    this.updateMsg = document.getElementById('updateMsg');
+    this.startDownloadUpdateBtn = document.getElementById('startDownloadUpdateBtn');
+    this.restartAppUpdateBtn = document.getElementById('restartAppUpdateBtn');
+    this.closeUpdateBannerBtn = document.getElementById('closeUpdateBannerBtn');
 
     this.historyDrawer = document.getElementById('historyDrawer');
     this.closeHistoryBtn = document.getElementById('closeHistoryBtn');
@@ -81,6 +89,23 @@ class AuraBrowser {
   initEventListeners() {
     // New tab button
     this.newTabBtn.addEventListener('click', () => this.createTab());
+
+    // Updater controls
+    this.checkUpdatesBtn.addEventListener('click', () => {
+      ipcRenderer.send('check-for-updates');
+    });
+
+    this.startDownloadUpdateBtn.addEventListener('click', () => {
+      ipcRenderer.send('download-update');
+    });
+
+    this.restartAppUpdateBtn.addEventListener('click', () => {
+      ipcRenderer.send('restart-and-install');
+    });
+
+    this.closeUpdateBannerBtn.addEventListener('click', () => {
+      this.updateBanner.style.display = 'none';
+    });
 
     // Navigation buttons
     this.backBtn.addEventListener('click', () => {
@@ -341,6 +366,53 @@ class AuraBrowser {
         item.path = data.path;
         this.renderDownloadsList();
       }
+    });
+
+    // Auto Updater IPC Listeners
+    ipcRenderer.on('checking-for-update', () => {
+      this.updateBanner.style.display = 'flex';
+      this.updateMsg.textContent = '🔍 Checking GitHub for new releases...';
+      this.startDownloadUpdateBtn.style.display = 'none';
+      this.restartAppUpdateBtn.style.display = 'none';
+    });
+
+    ipcRenderer.on('update-available', (event, info) => {
+      this.updateBanner.style.display = 'flex';
+      this.updateMsg.textContent = `🚀 Aura Browser v${info.version} is available!`;
+      this.startDownloadUpdateBtn.style.display = 'inline-block';
+      this.restartAppUpdateBtn.style.display = 'none';
+    });
+
+    ipcRenderer.on('update-not-available', (event, info) => {
+      this.updateBanner.style.display = 'flex';
+      this.updateMsg.textContent = info && info.isDev ? '✅ Running latest source (Dev Mode)' : `✅ Aura Browser is up to date!`;
+      this.startDownloadUpdateBtn.style.display = 'none';
+      this.restartAppUpdateBtn.style.display = 'none';
+      setTimeout(() => {
+        this.updateBanner.style.display = 'none';
+      }, 3500);
+    });
+
+    ipcRenderer.on('update-download-progress', (event, progressObj) => {
+      this.updateBanner.style.display = 'flex';
+      this.updateMsg.textContent = `⏳ Downloading update... ${Math.round(progressObj.percent)}%`;
+    });
+
+    ipcRenderer.on('update-downloaded', (event, info) => {
+      this.updateBanner.style.display = 'flex';
+      this.updateMsg.textContent = `✨ Update v${info.version} downloaded! Ready to install.`;
+      this.startDownloadUpdateBtn.style.display = 'none';
+      this.restartAppUpdateBtn.style.display = 'inline-block';
+    });
+
+    ipcRenderer.on('update-error', (event, message) => {
+      this.updateBanner.style.display = 'flex';
+      this.updateMsg.textContent = `ℹ️ Up to date (or checked GitHub Releases)`;
+      this.startDownloadUpdateBtn.style.display = 'none';
+      this.restartAppUpdateBtn.style.display = 'none';
+      setTimeout(() => {
+        this.updateBanner.style.display = 'none';
+      }, 3500);
     });
   }
 

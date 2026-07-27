@@ -114,6 +114,11 @@
             </svg>
             <span class="badge-dot" id="downloadBadge" style="display: none;"></span>
           </button>
+          <button class="nav-btn" id="checkUpdatesBtn" title="Check for Application Updates">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+            </svg>
+          </button>
           <button class="nav-btn" id="extensionsDrawerBtn" title="Extensions Manager">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
@@ -133,6 +138,14 @@
       <!-- Bookmarks Bar -->
       <div class="bookmarks-bar" id="bookmarksBar">
         <!-- Bookmark items rendered dynamically -->
+      </div>
+
+      <!-- Auto Updater Banner -->
+      <div class="update-banner" id="updateBanner" style="display: none;">
+        <span class="update-msg" id="updateMsg">🚀 Checking for updates...</span>
+        <button class="text-btn primary" id="startDownloadUpdateBtn" style="display: none;">Download & Install</button>
+        <button class="text-btn success" id="restartAppUpdateBtn" style="display: none;">Restart Now</button>
+        <button class="close-drawer-btn" id="closeUpdateBannerBtn">&times;</button>
       </div>
 
       <!-- Page Loading Progress Bar -->

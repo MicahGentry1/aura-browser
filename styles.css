@@ -741,5 +741,19 @@ webview.active {
   gap: 0.5rem;
 }
 
+.tab.pinned {
+  min-width: 42px;
+  max-width: 42px;
+  padding: 0.45rem 0.5rem;
+  justify-content: center;
+}
 
+.tab.pinned .tab-title,
+.tab.pinned .tab-close-btn,
+.tab.pinned .tab-audio-btn {
+  display: none;
+}
 
+.tab.pinned .tab-favicon {
+  margin: 0;
+}

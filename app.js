@@ -55,11 +55,14 @@ class AuraBrowser {
     this.closeFindBtn = document.getElementById('closeFindBtn');
 
     // Action Drawers & Buttons
+    this.pipBtn = document.getElementById('pipBtn');
+    this.readerModeBtn = document.getElementById('readerModeBtn');
     this.toggleBookmarksBarBtn = document.getElementById('toggleBookmarksBarBtn');
     this.historyDrawerBtn = document.getElementById('historyDrawerBtn');
     this.downloadsDrawerBtn = document.getElementById('downloadsDrawerBtn');
     this.extensionsDrawerBtn = document.getElementById('extensionsDrawerBtn');
     this.checkUpdatesBtn = document.getElementById('checkUpdatesBtn');
+    this.screenshotBtn = document.getElementById('screenshotBtn');
     this.devToolsBtn = document.getElementById('devToolsBtn');
 
     // Updater Banner Elements
@@ -106,6 +109,9 @@ class AuraBrowser {
     this.closeUpdateBannerBtn.addEventListener('click', () => {
       this.updateBanner.style.display = 'none';
     });
+
+    // Screenshot
+    this.screenshotBtn.addEventListener('click', () => this.captureScreenshot());
 
     // Navigation buttons
     this.backBtn.addEventListener('click', () => {
@@ -236,6 +242,12 @@ class AuraBrowser {
     this.zoomOutBtn.addEventListener('click', () => this.adjustZoom(-0.1));
     this.zoomVal.addEventListener('click', () => this.resetZoom());
 
+    // Picture-in-Picture
+    this.pipBtn.addEventListener('click', () => this.togglePiP());
+
+    // Reader Mode
+    this.readerModeBtn.addEventListener('click', () => this.toggleReaderMode());
+
     // Find in Page Bar
     this.findInPageBtn.addEventListener('click', () => this.toggleFindBar());
     this.closeFindBtn.addEventListener('click', () => this.hideFindBar());
@@ -316,6 +328,9 @@ class AuraBrowser {
         } else if (e.key.toLowerCase() === 'b' && e.shiftKey) {
           e.preventDefault();
           this.toggleBookmarksBarBtn.click();
+        } else if (e.key.toLowerCase() === 's' && e.shiftKey) {
+          e.preventDefault();
+          this.captureScreenshot();
         } else if (e.key === 'Tab') {
           e.preventDefault();
           this.switchNextTab();
@@ -481,6 +496,7 @@ class AuraBrowser {
       zoomFactor: 1.0,
       isPlayingAudio: false,
       isMuted: false,
+      isPinned: false,
       webview: webview
     };
 
@@ -583,6 +599,10 @@ class AuraBrowser {
     tabEl.className = 'tab';
     tabEl.id = 'tab_el_' + tab.id;
 
+    if (tab.isPinned) {
+      tabEl.classList.add('pinned');
+    }
+
     const faviconEl = document.createElement('img');
     faviconEl.className = 'tab-favicon';
     faviconEl.id = `favicon_${tab.id}`;
@@ -627,6 +647,15 @@ class AuraBrowser {
     closeBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       this.closeTab(tab.id);
+    });
+
+    tabEl.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      tab.isPinned = !tab.isPinned;
+      this.renderAllTabs();
+      this.savePinnedTabs();
+    });
+
     if (this.newTabBtn && this.newTabBtn.parentNode === this.tabBar) {
       this.tabBar.insertBefore(tabEl, this.newTabBtn);
     } else {
@@ -996,6 +1025,95 @@ class AuraBrowser {
 
       this.extensionsList.appendChild(item);
     });
+  }
+
+  // --- PICTURE-IN-PICTURE ---
+  async togglePiP() {
+    const activeTab = this.getActiveTab();
+    if (!activeTab || !activeTab.webview) return;
+    try {
+      await activeTab.webview.executeJavaScript(`
+        (async () => {
+          const video = document.querySelector('video');
+          if (video) {
+            if (document.pictureInPictureElement) {
+              await document.exitPictureInPicture();
+            } else {
+              await video.requestPictureInPicture();
+            }
+          } else {
+            alert('No video found on this page.');
+          }
+        })()
+      `);
+    } catch (err) {
+      console.warn('PiP failed:', err.message);
+    }
+  }
+
+  // --- READER MODE ---
+  async toggleReaderMode() {
+    const activeTab = this.getActiveTab();
+    if (!activeTab || !activeTab.webview) return;
+    try {
+      await activeTab.webview.executeJavaScript(`
+        (function() {
+          if (document.getElementById('aura-reader-overlay')) {
+            document.getElementById('aura-reader-overlay').remove();
+            return;
+          }
+          const article = document.querySelector('article') || document.querySelector('[role=main]') || document.querySelector('.post-content, .article-body, .entry-content, main') || document.body;
+          const title = document.querySelector('h1')?.textContent || document.title;
+          const content = article.innerHTML;
+          const overlay = document.createElement('div');
+          overlay.id = 'aura-reader-overlay';
+          overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:999999;background:#0f172a;overflow-y:auto;padding:3rem 1rem;';
+          overlay.innerHTML = '<div style="max-width:700px;margin:0 auto;font-family:Georgia,serif;color:#e2e8f0;line-height:1.8;font-size:1.15rem;"><button id="aura-reader-close" style="position:fixed;top:1rem;right:1.5rem;background:#6366f1;color:#fff;border:none;padding:0.5rem 1.2rem;border-radius:8px;cursor:pointer;font-size:0.9rem;font-family:sans-serif;z-index:1000000;">Exit Reader</button><h1 style="font-size:2rem;margin-bottom:1.5rem;color:#f8fafc;font-family:sans-serif;line-height:1.3;">' + title.replace(/</g,'&lt;') + '</h1>' + content + '</div>';
+          document.body.appendChild(overlay);
+          document.getElementById('aura-reader-close').addEventListener('click', function() { overlay.remove(); });
+        })()
+      `);
+    } catch (err) {
+      console.warn('Reader mode failed:', err.message);
+    }
+  }
+
+  // --- TAB PINNING ---
+  renderAllTabs() {
+    // Remove all tab elements (but not the new tab button)
+    const tabEls = this.tabBar.querySelectorAll('.tab');
+    tabEls.forEach(el => el.remove());
+    
+    // Sort: pinned tabs first
+    const sorted = [...this.tabs].sort((a, b) => (b.isPinned ? 1 : 0) - (a.isPinned ? 1 : 0));
+    sorted.forEach(tab => this.renderTabElement(tab));
+  }
+
+  savePinnedTabs() {
+    const pinned = this.tabs.filter(t => t.isPinned).map(t => ({ url: t.url, title: t.title }));
+    localStorage.setItem('aura_pinned_tabs', JSON.stringify(pinned));
+  }
+
+  // --- SCREENSHOT ---
+  async captureScreenshot() {
+    const activeTab = this.getActiveTab();
+    if (!activeTab || !activeTab.webview) return;
+    try {
+      const nativeImage = await activeTab.webview.capturePage();
+      const dataUrl = nativeImage.toDataURL();
+      const link = document.createElement('a');
+      link.download = `aura-screenshot-${Date.now()}.png`;
+      link.href = dataUrl;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Flash feedback
+      activeTab.webview.style.opacity = '0.5';
+      setTimeout(() => { activeTab.webview.style.opacity = '1'; }, 150);
+    } catch (err) {
+      console.warn('Screenshot failed:', err.message);
+    }
   }
 
   // --- DEVTOOLS INTEGRATION ---

@@ -6,7 +6,7 @@
   "scripts": {
     "start": "electron .",
     "build:exe": "electron-packager . \"Aura Browser\" --platform=win32 --arch=x64 --out=dist --overwrite",
-    "dist:installer": "node create-installer.js"
+    "dist:installer": "electron-builder --win nsis"
   },
   "build": {
     "appId": "com.aurabrowser.app",

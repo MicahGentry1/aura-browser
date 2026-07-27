@@ -125,7 +125,7 @@ class AuraBrowser {
     });
 
     this.startDownloadUpdateBtn.addEventListener('click', () => {
-      ipcRenderer.send('download-update');
+      ipcRenderer.send('download-update', this.latestDownloadUrl);
     });
 
     this.restartAppUpdateBtn.addEventListener('click', () => {
@@ -420,6 +420,7 @@ class AuraBrowser {
     ipcRenderer.on('update-available', (event, info) => {
       this.updateBanner.style.display = 'flex';
       this.updateMsg.textContent = `🚀 Aura Browser v${info.version} is available!`;
+      this.latestDownloadUrl = info.downloadUrl || info.releaseUrl;
       this.startDownloadUpdateBtn.style.display = 'inline-block';
       this.restartAppUpdateBtn.style.display = 'none';
     });

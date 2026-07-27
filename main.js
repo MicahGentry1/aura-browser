@@ -307,25 +307,103 @@ ipcMain.on('show-item-in-folder', (event, filePath) => {
 // --- AUTO UPDATER INTEGRATION ---
 const { autoUpdater } = require('electron-updater');
 
+try {
+  autoUpdater.setFeedURL({
+    provider: 'github',
+    owner: 'MicahGentry1',
+    repo: 'aura-browser'
+  });
+} catch (e) {
+  console.warn('Feed URL set note:', e.message);
+}
+
 autoUpdater.autoDownload = false;
 autoUpdater.autoInstallOnAppQuit = true;
 
-ipcMain.on('check-for-updates', () => {
-  if (app.isPackaged) {
-    autoUpdater.checkForUpdates().catch(err => {
+function compareVersions(v1, v2) {
+  const p1 = (v1 || '0').split('.').map(Number);
+  const p2 = (v2 || '0').split('.').map(Number);
+  for (let i = 0; i < Math.max(p1.length, p2.length); i++) {
+    const val1 = p1[i] || 0;
+    const val2 = p2[i] || 0;
+    if (val1 > val2) return 1;
+    if (val1 < val2) return -1;
+  }
+  return 0;
+}
+
+function checkGitHubReleases() {
+  return new Promise((resolve, reject) => {
+    const options = {
+      hostname: 'api.github.com',
+      path: '/repos/MicahGentry1/aura-browser/releases/latest',
+      headers: {
+        'User-Agent': 'AuraBrowser-App'
+      }
+    };
+    https.get(options, (res) => {
+      if (res.statusCode !== 200) {
+        return reject(new Error(`GitHub API HTTP ${res.statusCode}`));
+      }
+      let body = '';
+      res.on('data', chunk => body += chunk);
+      res.on('end', () => {
+        try {
+          const data = JSON.parse(body);
+          resolve(data);
+        } catch (e) {
+          reject(e);
+        }
+      });
+    }).on('error', reject);
+  });
+}
+
+ipcMain.on('check-for-updates', async () => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('checking-for-update');
+  }
+
+  try {
+    const latestRelease = await checkGitHubReleases();
+    const latestVersion = (latestRelease.tag_name || '').replace(/^v/, '');
+    const currentVersion = app.getVersion();
+
+    const isNewer = compareVersions(latestVersion, currentVersion) > 0;
+
+    if (isNewer) {
+      const asset = (latestRelease.assets || []).find(a => a.name.endsWith('.exe')) || {};
       if (mainWindow && !mainWindow.isDestroyed()) {
-        mainWindow.webContents.send('update-error', err ? err.message : 'Update check failed');
+        mainWindow.webContents.send('update-available', {
+          version: latestVersion,
+          releaseUrl: latestRelease.html_url,
+          downloadUrl: asset.browser_download_url || latestRelease.html_url
+        });
+      }
+    } else {
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('update-not-available', {
+          version: currentVersion,
+          latestVersion: latestVersion
+        });
+      }
+    }
+  } catch (err) {
+    console.warn('GitHub API update check note:', err.message);
+    autoUpdater.checkForUpdates().catch(e => {
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('update-error', e.message);
       }
     });
-  } else {
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.send('update-not-available', { version: app.getVersion(), isDev: true });
-    }
   }
 });
 
-ipcMain.on('download-update', () => {
-  autoUpdater.downloadUpdate();
+ipcMain.on('download-update', (event, downloadUrl) => {
+  if (downloadUrl && typeof downloadUrl === 'string' && downloadUrl.startsWith('http')) {
+    shell.openExternal(downloadUrl);
+  } else {
+    autoUpdater.downloadUpdate().catch(e => console.warn('downloadUpdate note:', e.message));
+  }
 });
 
 ipcMain.on('restart-and-install', () => {
@@ -364,6 +442,6 @@ autoUpdater.on('update-downloaded', (info) => {
 
 autoUpdater.on('error', (err) => {
   if (mainWindow && !mainWindow.isDestroyed()) {
-    mainWindow.webContents.send('update-error', err ? err.message : 'Update error');
+    mainWindow.webContents.send('update-error', err ? err.message : 'Update check failed');
   }
 });

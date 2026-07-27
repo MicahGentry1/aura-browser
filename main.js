@@ -1,7 +1,31 @@
 const { app, BrowserWindow, ipcMain, shell, Menu, dialog, session } = require('electron');
 const path = require('path');
+const fs = require('fs');
+
+// Handle Squirrel installer startup events
+if (require('electron-squirrel-startup')) {
+  app.quit();
+}
 
 let mainWindow = null;
+
+function registerStartMenuShortcut() {
+  if (process.platform !== 'win32') return;
+  try {
+    const appData = app.getPath('appData');
+    const startMenuDir = path.join(appData, 'Microsoft', 'Windows', 'Start Menu', 'Programs');
+    const shortcutPath = path.join(startMenuDir, 'Aura Browser.lnk');
+
+    // Always ensure shortcut exists in Start Menu Programs for Windows Search
+    shell.writeShortcutLink(shortcutPath, 'create', {
+      target: process.execPath,
+      description: 'Aura Browser - Desktop Web Browser powered by Chromium',
+      workingDirectory: path.dirname(process.execPath)
+    });
+  } catch (err) {
+    console.warn('Start Menu shortcut registration note:', err.message);
+  }
+}
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -124,6 +148,7 @@ function createWindow() {
 
 app.whenReady().then(() => {
   createWindow();
+  registerStartMenuShortcut();
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {

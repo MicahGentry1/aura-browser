@@ -12,6 +12,7 @@ async function buildInstaller() {
       setupExe: 'AuraBrowserSetup.exe',
       setupMsi: 'AuraBrowserSetup.msi',
       title: 'Aura Browser',
+      shortcutName: 'Aura Browser',
       description: 'Modern desktop web browser powered by the Chromium engine',
       noMsi: true
     });

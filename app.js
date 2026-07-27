@@ -7,6 +7,7 @@ class AuraBrowser {
     this.bookmarks = JSON.parse(localStorage.getItem('aura_bookmarks') || '[]');
     this.history = JSON.parse(localStorage.getItem('aura_history') || '[]');
     this.downloads = [];
+    this.loadedExtensions = JSON.parse(localStorage.getItem('aura_extensions') || '[]');
     this.blockedCount = 0;
     this.shieldEnabled = true;
 
@@ -14,6 +15,7 @@ class AuraBrowser {
     this.initEventListeners();
     this.initIPC();
     this.renderBookmarksBar();
+    this.loadSavedExtensions();
 
     // Create initial tab
     this.createTab();
@@ -56,6 +58,7 @@ class AuraBrowser {
     this.toggleBookmarksBarBtn = document.getElementById('toggleBookmarksBarBtn');
     this.historyDrawerBtn = document.getElementById('historyDrawerBtn');
     this.downloadsDrawerBtn = document.getElementById('downloadsDrawerBtn');
+    this.extensionsDrawerBtn = document.getElementById('extensionsDrawerBtn');
     this.devToolsBtn = document.getElementById('devToolsBtn');
 
     this.historyDrawer = document.getElementById('historyDrawer');
@@ -68,6 +71,11 @@ class AuraBrowser {
     this.closeDownloadsBtn = document.getElementById('closeDownloadsBtn');
     this.downloadsList = document.getElementById('downloadsList');
     this.downloadBadge = document.getElementById('downloadBadge');
+
+    this.extensionsDrawer = document.getElementById('extensionsDrawer');
+    this.closeExtensionsBtn = document.getElementById('closeExtensionsBtn');
+    this.loadUnpackedBtn = document.getElementById('loadUnpackedBtn');
+    this.extensionsList = document.getElementById('extensionsList');
   }
 
   initEventListeners() {
@@ -154,12 +162,35 @@ class AuraBrowser {
     // Downloads Drawer
     this.downloadsDrawerBtn.addEventListener('click', () => {
       this.historyDrawer.classList.remove('open');
+      this.extensionsDrawer.classList.remove('open');
       this.downloadsDrawer.classList.toggle('open');
       this.downloadBadge.style.display = 'none';
     });
 
     this.closeDownloadsBtn.addEventListener('click', () => {
       this.downloadsDrawer.classList.remove('open');
+    });
+
+    // Extensions Drawer
+    this.extensionsDrawerBtn.addEventListener('click', () => {
+      this.historyDrawer.classList.remove('open');
+      this.downloadsDrawer.classList.remove('open');
+      this.extensionsDrawer.classList.toggle('open');
+      this.renderExtensionsList();
+    });
+
+    this.closeExtensionsBtn.addEventListener('click', () => {
+      this.extensionsDrawer.classList.remove('open');
+    });
+
+    this.loadUnpackedBtn.addEventListener('click', async () => {
+      const res = await ipcRenderer.invoke('select-extension-folder');
+      if (res && res.success) {
+        this.addExtensionEntry(res);
+        this.renderExtensionsList();
+      } else if (res && res.error) {
+        alert('Failed to load extension: ' + res.error);
+      }
     });
 
     // Privacy & Ad Shield Toggle
@@ -825,6 +856,71 @@ class AuraBrowser {
       }
 
       this.downloadsList.appendChild(item);
+    });
+  }
+
+  // --- EXTENSIONS MANAGEMENT ---
+  async loadSavedExtensions() {
+    try {
+      if (this.loadedExtensions.length === 0) {
+        const path = require('path');
+        const samplePath = path.join(__dirname, 'extensions', 'sample-aura-extension');
+        const res = await ipcRenderer.invoke('load-extension-by-path', samplePath);
+        if (res && res.success) {
+          this.addExtensionEntry(res);
+        }
+      } else {
+        for (const ext of this.loadedExtensions) {
+          await ipcRenderer.invoke('load-extension-by-path', ext.path);
+        }
+      }
+    } catch (err) {
+      console.warn('Extension load note:', err.message);
+    }
+  }
+
+  addExtensionEntry(ext) {
+    if (!this.loadedExtensions.some(e => e.path === ext.path)) {
+      this.loadedExtensions.push({
+        id: ext.id,
+        name: ext.name,
+        version: ext.version,
+        path: ext.path
+      });
+      localStorage.setItem('aura_extensions', JSON.stringify(this.loadedExtensions));
+    }
+  }
+
+  async removeExtension(extId) {
+    await ipcRenderer.invoke('remove-extension', extId);
+    this.loadedExtensions = this.loadedExtensions.filter(e => e.id !== extId);
+    localStorage.setItem('aura_extensions', JSON.stringify(this.loadedExtensions));
+    this.renderExtensionsList();
+  }
+
+  renderExtensionsList() {
+    this.extensionsList.innerHTML = '';
+    if (this.loadedExtensions.length === 0) {
+      this.extensionsList.innerHTML = '<div class="empty-state">No extensions loaded yet.<br>Click <b>+ Load Unpacked</b> to add an unpacked Chrome Extension folder.</div>';
+      return;
+    }
+
+    this.loadedExtensions.forEach(ext => {
+      const item = document.createElement('div');
+      item.className = 'extension-item';
+      item.innerHTML = `
+        <div class="item-info">
+          <div class="item-title">${ext.name} <span class="extension-badge">v${ext.version}</span></div>
+          <div class="item-sub">${ext.path}</div>
+        </div>
+        <button class="text-btn danger">Remove</button>
+      `;
+
+      item.querySelector('.text-btn.danger').addEventListener('click', () => {
+        this.removeExtension(ext.id);
+      });
+
+      this.extensionsList.appendChild(item);
     });
   }
 

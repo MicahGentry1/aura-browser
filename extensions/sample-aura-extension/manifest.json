@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "Aura Page Enhancer",
+  "version": "1.0.0",
+  "description": "Sample Chromium extension for Aura Browser providing smooth page enhancement",
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ]
+}

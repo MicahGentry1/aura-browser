@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, shell, Menu } = require('electron');
+const { app, BrowserWindow, ipcMain, shell, Menu, dialog, session } = require('electron');
 const path = require('path');
 
 let mainWindow = null;
@@ -144,6 +144,53 @@ ipcMain.on('open-devtools', (event, webContentsId) => {
   const targetWebContents = webContents.fromId(webContentsId);
   if (targetWebContents) {
     targetWebContents.openDevTools({ mode: 'detach' });
+  }
+});
+
+// IPC Handlers for Chromium Extensions
+ipcMain.handle('select-extension-folder', async () => {
+  if (!mainWindow) return null;
+  const result = await dialog.showOpenDialog(mainWindow, {
+    properties: ['openDirectory'],
+    title: 'Select Unpacked Chrome Extension Folder (with manifest.json)'
+  });
+  if (result.canceled || result.filePaths.length === 0) return null;
+  const extPath = result.filePaths[0];
+  try {
+    const ext = await session.defaultSession.loadExtension(extPath, { allowFileAccess: true });
+    return {
+      success: true,
+      id: ext.id,
+      name: ext.name,
+      version: ext.version,
+      path: extPath
+    };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+});
+
+ipcMain.handle('load-extension-by-path', async (event, extPath) => {
+  try {
+    const ext = await session.defaultSession.loadExtension(extPath, { allowFileAccess: true });
+    return {
+      success: true,
+      id: ext.id,
+      name: ext.name,
+      version: ext.version,
+      path: extPath
+    };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+});
+
+ipcMain.handle('remove-extension', async (event, extId) => {
+  try {
+    session.defaultSession.removeExtension(extId);
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: err.message };
   }
 });
 

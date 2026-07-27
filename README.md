@@ -4,13 +4,13 @@ A modern, fast, and feature-rich desktop web browser powered by the **Chromium**
 
 ![Chromium Engine](https://img.shields.io/badge/Engine-Chromium%20Blink-6366f1?style=for-the-badge)
 ![Extensions](https://img.shields.io/badge/Extensions-Chrome%20Unpacked-818cf8?style=for-the-badge)
-![Release](https://img.shields.io/badge/Release-v1.0.0-6366f1?style=for-the-badge)
+![Release](https://img.shields.io/badge/Release-v1.0.1-6366f1?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-MIT-10b981?style=for-the-badge)
 ![Platform](https://img.shields.io/badge/Platform-Windows%20x64-0284c7?style=for-the-badge)
 
 ---
 
-### 📦 [Download AuraBrowserSetup.exe (v1.0.0)](https://github.com/MicahGentry1/aura-browser/releases/download/v1.0.0/AuraBrowserSetup.exe)
+### 📦 [Download AuraBrowserSetup.exe (v1.0.1)](https://github.com/MicahGentry1/aura-browser/releases/download/v1.0.1/AuraBrowserSetup.exe)
 
 > [!NOTE]
 > **Windows SmartScreen / Defender Notice**:
